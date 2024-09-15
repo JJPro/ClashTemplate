@@ -1,0 +1,15 @@
+DOMAIN-SUFFIX,community.synology.com
+DOMAIN-SUFFIX,linkedin.com
+DOMAIN-SUFFIX,leetcode.com
+DOMAIN-SUFFIX,btdig.com
+
+# JIRA
+DOMAIN-SUFFIX,atlassian.com
+DOMAIN-SUFFIX,gravatar.com
+DOMAIN-SUFFIX,atl-paas.net
+DOMAIN-SUFFIX,pendo.io
+DOMAIN-SUFFIX,cloudfront.net
+DOMAIN-SUFFIX,recaptcha.net
+DOMAIN-SUFFIX,gstatic.cn
+DOMAIN-SUFFIX,yasoon.com
+DOMAIN-SUFFIX,ytimg.com
