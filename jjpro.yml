@@ -1,0 +1,327 @@
+# Clash.Meta (Mihomo)
+
+# REF:
+# [关于no-resolve的理解](https://linux.do/t/topic/155121):
+# 正常匹配IPCIDR规则时，会先对domain进行DNS解析然后在与这个规则匹配,
+# 加上no-resolve后，这条规则直接跳过，不进行DNS解析。
+# 也就是说，只有直接对目标IP发起的请求才会尝试对此条IPCIDR规则尝试匹配
+
+# 锚点
+ptr-proxy-group--urltest-props: &ptr-proxy-group--urltest-props
+  tolerance: 20
+  interval: 300
+#### END:锚点 ####
+
+find-process-mode: strict
+
+# 策略组选择和fakeip缓存
+profile:
+  store-selected: true
+  store-fake-ip: true
+
+# DNS模块
+dns:
+  enhanced-mode: fake-ip
+  fake-ip-filter:
+    - rule-set:private
+    - rule-set:private-fakeip-filter
+
+hosts:
+  # HOME services
+  dsm.home.jjprotech.me: 192.168.10.3
+  active.home.jjprotech.me: 192.168.10.3
+  +.home.jjprotech.me: 192.168.10.6
+  qbit.jjpro.me: 192.168.10.6
+  easyimage.jjpro.me: 192.168.10.6
+  +.home.jjpro.me: 192.168.10.6
+  invoice.jjpro.me: 192.168.10.6
+  leantime.jjpro.me: 192.168.10.6
+  learn.jjpro.me: 192.168.10.6
+  monica.jjpro.me: 192.168.10.6
+  mqtt.home.jjprotech.me: 192.168.10.15
+  speedtest.home.jjprotech.me: 192.168.10.16
+
+  # GTJA
+  arch.gtja.net: 10.115.3.6
+  yyzg.gtja.net: 10.115.12.230
+  oc.gtja.net: 10.115.160.3
+  og.gtja.net: 10.115.160.3
+  codeanalysis.gtja.net: 10.115.160.17
+  fintechdevops.gtja.net: 10.115.160.61
+  pingcode.gtja.net: 10.115.160.63
+  fams.gtja.net: 10.115.160.68
+
+  jfrogdev.gtja.net: 10.146.97.1
+  vintexuatadmin.gtja.com: 10.168.105.76
+
+  kylin.gtja.local: 10.176.66.218
+  work.gtja.local: 10.176.67.173
+  securelogin.arubanetworks.com: 10.176.161.48
+
+  fy.gtja.net: 10.180.97.76
+  sg.gtja.net: 10.180.141.67
+
+  vintexpreadmin.gtja.com: 10.181.66.35
+  gitlab.gtja.net: 10.181.100.131
+  odcp.gtja.net: 10.181.100.210
+  bitbucket.gtja.net: 10.181.100.211
+  csgl.gtja.net: 10.181.100.217
+  fintech.gtja.net: 10.181.100.223
+  conf.gtja.net: 10.181.101.171
+  www.gtja.net: 10.181.101.208
+  oa.gtja.net: 10.181.101.210
+  jira.gtja.net: 10.181.101.212
+  yunpan.gtja.net: 10.181.103.169
+  dss.gtja.net: 10.181.108.100
+  emall.gtja.net: 10.181.110.170
+  cloud.gtja.net: 10.181.119.50
+  sso.gtja.net: 10.181.144.228
+  aigc.gtja.net: 10.181.150.41
+  cmail.gtja.net: 10.181.153.20
+
+  vintexadmin.gtja.com: 10.184.32.199
+  vpn.uat.gtja.com: 10.184.32.199
+
+  www.gtjadev.net: 10.187.224.88
+  sso.gtjadev.net: 10.187.224.88
+
+# 策略组
+proxy-groups:
+  - name: 自动选择
+    type: url-test
+    include-all: true
+    <<: *ptr-proxy-group--urltest-props
+  - name: Speedtest
+    type: select
+    proxies: [香港, 美国, 日本, 特惠]
+  - name: NETFLIX
+    type: select
+    proxies: [特惠->美国, 美国, 香港, 日本]
+  - name: AI服务
+    type: fallback
+    proxies: [日本, 美国]
+    <<: *ptr-proxy-group--urltest-props
+  - name: 谷歌服务
+    type: select
+    proxies: [自动选择, 特惠->美国->香港, 香港, 美国, 日本, 特惠]
+    <<: *ptr-proxy-group--urltest-props
+  - name: 苹果国际服务
+    type: select
+    proxies: [美国, 自动选择, DIRECT]
+  - name: 微软服务
+    type: select
+    proxies: [美国, 日本, 香港, 自动选择]
+  - name: 国外媒体
+    type: select
+    proxies: [特惠->美国->香港, 自动选择]
+  - name: PikPak
+    type: fallback
+    proxies: [特惠, 日本, 美国, 香港]
+    <<: *ptr-proxy-group--urltest-props
+  - name: XXX
+    type: select
+    proxies: [特惠->美国, 特惠->香港, 特惠->美国->香港, 香港]
+  - name: 漏网之鱼
+    type: select
+    proxies: [自动选择, 特惠, 美国, 日本, 香港]
+
+  # 基础依赖组
+
+  ## 1. fallback组
+  - name: 特惠->美国
+    type: fallback
+    proxies: [特惠, 美国]
+    <<: *ptr-proxy-group--urltest-props
+  - name: 特惠->香港
+    type: fallback
+    proxies: [特惠, 香港]
+    <<: *ptr-proxy-group--urltest-props
+  - name: 特惠->美国->香港
+    type: fallback
+    proxies: [特惠, 美国, 香港]
+    <<: *ptr-proxy-group--urltest-props
+  - name: 特惠->美国->日本->香港
+    type: fallback
+    proxies: [特惠, 美国, 日本, 香港]
+    <<: *ptr-proxy-group--urltest-props
+
+  ## 2. 国家地区组
+  - name: 美国 # 已包含优惠节点
+    type: url-test
+    <<: *ptr-proxy-group--urltest-props
+    include-all: true
+    filter: '(s801|c39s[1-3])'
+  - name: 香港
+    type: url-test
+    <<: *ptr-proxy-group--urltest-props
+    include-all: true
+    filter: 'c719s\d\.'
+  - name: 日本
+    type: url-test
+    <<: *ptr-proxy-group--urltest-props
+    include-all: true
+    filter: c39s4
+  - name: 特惠
+    type: url-test
+    <<: *ptr-proxy-group--urltest-props
+    include-all: true
+    filter: s801
+
+# 规则集
+rule-anchor:
+  domain: &domain { type: http, interval: 86400, behavior: domain, format: mrs }
+  domain-text:
+    &domain-text { type: http, interval: 86400, behavior: domain, format: text }
+  ip: &ip { type: http, interval: 86400, behavior: ipcidr, format: mrs }
+  classic:
+    &classic { type: http, interval: 86400, behavior: classical, format: text }
+
+rule-providers:
+  jason-direct-domain:
+    <<: *domain-text
+    url: https://ghp.ci/https://raw.githubusercontent.com/JJPro/ClashTemplate/trunk/ruleset/direct.list
+  jason-autoselect-domain:
+    <<: *domain-text
+    url: https://ghp.ci/https://raw.githubusercontent.com/JJPro/ClashTemplate/trunk/ruleset/autoselect.list
+  jason-us-domain:
+    <<: *domain-text
+    url: https://ghp.ci/https://raw.githubusercontent.com/JJPro/ClashTemplate/trunk/ruleset/us.list
+  private-fakeip-filter:
+    <<: *domain-text
+    url: https://ghp.ci/https://raw.githubusercontent.com/JJPro/ClashTemplate/trunk/ruleset/fakeip-filter.list
+
+  private:
+    <<: *domain
+    url: https://ghp.ci/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/private.mrs
+  private-ip:
+    <<: *ip
+    url: https://ghp.ci/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geoip/private.mrs
+  pikpak:
+    <<: *domain
+    url: https://ghp.ci/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/pikpak.mrs
+  speedtest:
+    <<: *domain
+    url: https://ghp.ci/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/speedtest.mrs
+  github:
+    <<: *domain
+    url: https://ghp.ci/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/github.mrs
+  category-porn:
+    <<: *domain
+    url: https://ghp.ci/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/category-porn.mrs
+  netflix:
+    <<: *domain
+    url: https://ghp.ci/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/netflix.mrs
+  google@cn:
+    <<: *domain
+    url: https://ghp.ci/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/google@cn.mrs
+  google:
+    <<: *domain
+    url: https://ghp.ci/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/google.mrs
+  steam@cn:
+    <<: *domain
+    url: https://ghp.ci/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/steam@cn.mrs
+  amazon@cn:
+    <<: *domain
+    url: https://ghp.ci/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/amazon@cn.mrs
+  amazon:
+    <<: *domain
+    url: https://ghp.ci/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/amazon.mrs
+  dropbox:
+    <<: *domain
+    url: https://ghp.ci/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/dropbox.mrs
+  notion:
+    <<: *domain
+    url: https://ghp.ci/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/notion.mrs
+  telegram:
+    <<: *domain
+    url: https://ghp.ci/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/telegram.mrs
+  atlassian:
+    <<: *domain
+    url: https://ghp.ci/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/atlassian.mrs
+  apple@cn:
+    <<: *domain
+    url: https://ghp.ci/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/apple@cn.mrs
+  apple:
+    <<: *domain
+    url: https://ghp.ci/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/apple.mrs
+  microsoft@cn:
+    <<: *domain
+    url: https://ghp.ci/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/microsoft@cn.mrs
+  microsoft:
+    <<: *domain
+    url: https://ghp.ci/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/microsoft.mrs
+  tiktok:
+    <<: *domain
+    url: https://ghp.ci/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/tiktok.mrs
+  cn:
+    <<: *domain
+    url: https://ghp.ci/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/cn.mrs
+  geolocation-!cn:
+    <<: *domain
+    url: https://ghp.ci/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/geolocation-!cn.mrs
+  category-media-cn:
+    <<: *domain
+    url: https://ghp.ci/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/category-media-cn.mrs
+  category-media:
+    <<: *domain
+    url: https://ghp.ci/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/category-media.mrs
+  category-games:
+    <<: *domain
+    url: https://ghp.ci/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/category-games.mrs
+  ai-ip:
+    <<: *ip
+    url: https://ghp.ci/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geoip/ai.mrs
+  apple-ip:
+    <<: *ip
+    url: https://ghp.ci/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geoip/apple.mrs
+  google-ip:
+    <<: *ip
+    url: https://ghp.ci/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geoip/google.mrs
+  netflix-ip:
+    <<: *ip
+    url: https://ghp.ci/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geoip/netflix.mrs
+  cn-ip:
+    <<: *ip
+    url: https://ghp.ci/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geoip/cn.mrs
+
+rules:
+  - RULE-SET,private-ip,DIRECT,no-resolve
+  - RULE-SET,private,DIRECT
+  - RULE-SET,jason-direct-domain,DIRECT
+  - RULE-SET,jason-autoselect-domain,自动选择
+  - RULE-SET,jason-us-domain,美国
+  - RULE-SET,pikpak,PikPak
+  - RULE-SET,speedtest,Speedtest
+  - RULE-SET,github,自动选择
+  - RULE-SET,category-porn,XXX
+  - RULE-SET,netflix,NETFLIX
+  - RULE-SET,google@cn,DIRECT
+  - RULE-SET,google,谷歌服务
+  - RULE-SET,steam@cn,DIRECT
+  - RULE-SET,amazon@cn,DIRECT
+  - RULE-SET,amazon,美国
+  - RULE-SET,dropbox,自动选择
+  - RULE-SET,notion,自动选择
+  - RULE-SET,telegram,自动选择
+  - RULE-SET,atlassian,自动选择
+  - RULE-SET,apple@cn,DIRECT
+  - RULE-SET,apple,苹果国际服务
+  - RULE-SET,microsoft@cn,DIRECT
+  - RULE-SET,microsoft,微软服务
+  - RULE-SET,tiktok,美国
+  - RULE-SET,cn,DIRECT
+  - RULE-SET,category-media-cn,DIRECT
+  - RULE-SET,category-media,国外媒体
+  - RULE-SET,category-games,自动选择
+
+  - RULE-SET,ai-ip,AI服务,no-resolve
+  - RULE-SET,apple-ip,苹果国际服务,no-resolve
+  - RULE-SET,google-ip,谷歌服务,no-resolve
+  - RULE-SET,netflix-ip,NETFLIX,no-resolve
+  - RULE-SET,cn-ip,DIRECT,no-resolve
+
+  # Catch All
+  # 避免BT流量走代理
+  - DST-PORT,80,漏网之鱼
+  - DST-PORT,443,漏网之鱼
+  - MATCH,DIRECT
