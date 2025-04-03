@@ -1,7 +1,9 @@
 # GTJA
 +.gtja.*
 +.gtjadev.*
++.gtjadev.*.*
 +.gtht.*
++.gtht.*.*
 
 # Ping
 +.baidu.com
