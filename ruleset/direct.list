@@ -4,3 +4,5 @@ DOMAIN-SUFFIX,jellyfin.org
 DOMAIN-SUFFIX,233.com
 DOMAIN-KEYWORD,mokexapp
 DOMAIN-KEYWORD,bnappweb
+## 扫地机器人
+SRC-IP-CIDR,192.168.10.195
