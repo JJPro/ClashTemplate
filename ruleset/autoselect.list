@@ -14,3 +14,7 @@ DOMAIN-SUFFIX,recaptcha.net
 DOMAIN-SUFFIX,gstatic.cn
 DOMAIN-SUFFIX,yasoon.com
 DOMAIN-SUFFIX,ytimg.com
+
+# lovingheart 也走代理吧速度快些，不然看日志卡顿
+
+DOMAIN-SUFFIX,lovingheartretreats.com
