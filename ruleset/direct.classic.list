@@ -7,5 +7,7 @@ DOMAIN-KEYWORD,bnappweb
 
 ## 扫地机器人
 SRC-IP-CIDR,192.168.10.195/32
+## 蒲公英macvlan
+SRC-IP-CIDR,192.168.10.5/32
 ## 蒲公英盒子
 SRC-IP-CIDR,192.168.20.3/32
